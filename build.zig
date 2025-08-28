@@ -18,10 +18,13 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const clay_lib = b.addStaticLibrary(.{
+    const clay_lib = b.addLibrary(.{
         .name = "clay",
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = null,
+            .target = target,
+            .optimize = optimize,
+        })
     });
 
     const clay_src = b.dependency("clay_src", .{});
@@ -52,9 +55,12 @@ pub fn build(b: *std.Build) void {
     // }
 
     const check_clay = b.addTest(.{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-        .optimize = optimize,
+        .name = "check_clay",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/root.zig"),
+            .target = target,
+            .optimize = optimize
+        })
     });
     const test_step = b.step("test", "Check for library compilation errors");
     test_step.dependOn(&check_clay.step);
